@@ -1,0 +1,13 @@
+*.pyc
+*.cache
+*.log.*
+*.txt
+.idea
+*.cfg
+
+*.log.?
+*.log
+*.pid
+dropin.cache
+FLH/FLH/_settings_local.py
+
