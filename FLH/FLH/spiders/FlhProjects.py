@@ -42,17 +42,24 @@ class FlSpider(CrawlSpider):
 
     def search_cms(self, response):
         cms_dict = {
-         'WordPress': 'wp-content',
-         'Joomla': 'blablaJoomla'
+         'WordPress': ['wp-content', 'wp-includes'],
+         'Joomla': ['Joomla', 'com-content'],
+         'Drupal': ['page-node'],
+         'MediaWiki': ['MediaWiki']
         }
-        cms = 'WordPress'
         item = response.meta['item']
         hxs = HtmlXPathSelector(response)
-        body = hxs.xpath('//body').extract_first()
-        if cms_dict[cms] in body:
-            item["cms"] = cms
-        else:
-            item["cms"] = ' '
+        html = hxs.xpath('/html').extract_first()
+
+        for key in cms_dict:
+            find = False
+            for value in cms_dict[key]:
+                if value in html:
+                    item["cms"] = key
+                    find = True
+            if find:
+                break
+            item["cms"] = None
         yield item
 
     def decode_idna(self, url):
