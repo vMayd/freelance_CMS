@@ -12,4 +12,5 @@ class FlhItem(scrapy.Item):
     title = scrapy.Field()
     url = scrapy.Field()
     title_without_url = scrapy.Field()
-    category = scrapy.Field()
+   # category = scrapy.Field()
+    cms = scrapy.Field()
