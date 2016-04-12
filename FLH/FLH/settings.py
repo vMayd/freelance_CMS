@@ -62,6 +62,8 @@ NEWSPIDER_MODULE = 'FLH.spiders'
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
+   # 'FLH.pipelines.DuplicatesPipeline':100,
+    #'FLH.pipelines.AvailablePipeline':200,
     'FLH.pipelines.PostgresPipeline': 300,
 }
 

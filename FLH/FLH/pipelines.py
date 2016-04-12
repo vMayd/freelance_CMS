@@ -4,7 +4,7 @@
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 import urllib2
-
+from scrapy.exceptions import DropItem
 
 class PostgresPipeline(object):
 
@@ -15,26 +15,27 @@ class PostgresPipeline(object):
                                      dbname="CMS",
                                      host='localhost')
 
-    def check_url_available(self, url_list):
-        for url in url_list:
-            if not url:
-                return "Url not found"
-            else:
-                check = urllib2.urlopen(url)
-                if check.code == 200:
-                    return "Available"
-                else:
-                    return "Not available"
-
     def process_item(self, item, spider):
         cursor = self.conn.cursor()
-        cursor.execute("insert into cms_urls ( url, title, title_without_url, category, url_available ) values (%s, %s, %s, %s, %s);",
+        cursor.execute("insert into first_cms ( url, title, cms, title_without_url ) values (%s, %s, %s, %s)",
                        [
-                           item["url"],
-                           item["title"],
-                           item["title_without_url"],
-                           item["category"],
-                           self.check_url_available(item["url"])
+                           item['url'][0],
+                           item["title"][0],
+                           item["cms"],
+                           item["title_without_url"][0]
                        ])
         self.conn.commit()
         return item
+
+class DuplicatesPipeline(object):
+
+    def __init__(self):
+        self.url_seen = []
+
+    def process_item(self, item, spider):
+        if item['url'] in self.url_seen:
+            raise DropItem("Duplicate item found: %s" % item)
+        else:
+            self.url_seen.append(item['url'])
+            return item
+
