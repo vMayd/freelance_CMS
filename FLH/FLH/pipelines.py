@@ -3,9 +3,11 @@
 # Define your item pipelines here
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
-import urllib2
+import datetime
 from scrapy.exceptions import DropItem
-
+'''
+Write data to PostgreSQL database
+'''
 class PostgresPipeline(object):
 
     def __init__(self):
@@ -17,12 +19,12 @@ class PostgresPipeline(object):
 
     def process_item(self, item, spider):
         cursor = self.conn.cursor()
-        cursor.execute("insert into first_cms ( url, title, cms, title_without_url ) values (%s, %s, %s, %s)",
+        cursor.execute("INSERT INTO first_cms (url, title, cms, title_without_url ) VALUES (%s, %s, %s, %s) ",
                        [
                            item['url'][0],
                            item["title"][0],
                            item["cms"],
-                           item["title_without_url"][0]
+                           datetime.datetime.now()
                        ])
         self.conn.commit()
         return item
