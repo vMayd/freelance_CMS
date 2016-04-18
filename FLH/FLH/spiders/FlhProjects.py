@@ -4,7 +4,8 @@ from scrapy.contrib.spiders import CrawlSpider, Rule
 from scrapy.selector import HtmlXPathSelector
 from scrapy.http.request import Request
 from FLH.items import FlhItem
-import urllib2
+
+
 class FlSpider(CrawlSpider):
     name = 'F'
     allowed_domains = ['freelancehunt.com']
@@ -18,28 +19,35 @@ class FlSpider(CrawlSpider):
             links.append('https://freelancehunt.com'+link)
         for url in links:
             yield Request(url, self.parse_items)
-
+    '''
+    This function retrieves information
+    about projects of freelancers.
+    '''
     def parse_items(self, response):
         hxs = HtmlXPathSelector(response)
         titles = hxs.xpath("//div[@class='snippet-position-container']")
         items=[]
         for titles in titles:
             item = FlhItem()
+            #item["title_without_url"]=[None]
             item["url"] = titles.select("h4/a/@href").extract()
             if not item["url"]:
-                item["url"]=[' ']
-                item["title_without_url"] = titles.select("h4/text()").re("\s*\n?(.+)\n")
-                item["title"]=' '
+                item["url"] = [None]
+                #item["title_without_url"] = titles.select("h4/text()").re("\s*\n?(.+)\n")
+                item["title"] = titles.select("h4/text()").re("\s*\n?(.+)\n")
             else:
                 item["title"] = titles.select("h4/a/text()").re("\s*\n?(.+)\n")
-                item["title_without_url"]=' '
+
                 if isinstance(item["url"],list):
                     url_to_request = item["url"][0]
                 else:
                     url_to_request =item["url"]
                 url_decoded = self.decode_idna(url_to_request)
             yield Request(url_decoded, callback=self.search_cms, dont_filter=True, meta={'item': item})
-
+    '''
+    Function checks the content of html and search
+    for keywords defined in cms_dict to identify specific CMS
+    '''
     def search_cms(self, response):
         cms_dict = {
          'WordPress': ['wp-content', 'wp-includes'],
@@ -61,7 +69,9 @@ class FlSpider(CrawlSpider):
                 break
             item["cms"] = None
         yield item
-
+    '''
+    Decode URL address if it has international domain name
+    '''
     def decode_idna(self, url):
         part = url.split('//')
         if part[1].endswith('/'):
